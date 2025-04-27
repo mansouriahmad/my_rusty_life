@@ -1,0 +1,465 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>My Rusty Life</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">My Rusty Life</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p>I was watching <a href="https://www.youtube.com/watch?v=xO2xyBfhKDY&amp;list=PLqbS7AVVErFgh0GugQZcW8sSSTuyZ7K87">the interview</a></p>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Checkout the issue with Async Operation, and Async Cancellation
+<ul>
+<li><input disabled="" type="checkbox"/>
+He mentioned something about going to <a href="https://smallcultfollowing.com/babysteps">Nicholas Matsakis blog</a></li>
+</ul>
+</li>
+</ul>
+<p>Using ~ on vim change the case of a character</p>
+<p>We have modifiers in VIM like i and a. If you are in the middle of (), you can use "d+i+b" or "d+i+(" to remove the content inside ().</p>
+<div style="break-before: page; page-break-before: always;"></div><p>1 - Porting FlameGraph to rust</p>
+<p>When running an application in Linux, you can use these commands before your application to understasnd more about where the CPU actually spending time when running your applicaation:</p>
+<ul>
+<li><em><strong>perf stat</strong></em></li>
+<li><em><strong>perf record -g</strong></em>
+<ul>
+<li>After you are done with command, you can run <em>perf report</em> which reads the report for you! However, it is not much usefull!</li>
+</ul>
+</li>
+<li><em><strong>perf record -g --call-graph dwarf</strong></em></li>
+</ul>
+<p>What is better for this?
+Use FlameGraph! :)</p>
+<p>On MAC you can use dTrace instead of perf:</p>
+<p>First run you application when running dTrace:</p>
+<pre><code class="language-bash">sudo dtrace -n 'profile-997 /pid == $target/ { @[ustack()] = count(); }' -c "./target/release/your_app" -o out.stacks
+</code></pre>
+<p>Then you need to run flamegraph:</p>
+<pre><code class="language-bash">./Flamegraph/stackcollapse.pl out.stacks &gt; out.folded
+./Flamegraph/flamegraph.pl out.folded &gt; flamegraph.svg
+</code></pre>
+<p><strong>Hardware and Softwares :D :</strong></p>
+<p>look at Firefox multi-account container
+look at <a href="https://github.com/wting/autojump">j</a> command</p>
+<div style="break-before: page; page-break-before: always;"></div><p>The author recommends doing side project when reading the book!</p>
+<p>Look at Chris Biscardi's video on Youtube.</p>
+<p>Traits are:</p>
+<ul>
+<li>Like interfaces in C++ and Java</li>
+<li>The main way Rust supports integrating your types into the language itself</li>
+</ul>
+<p>You can find the github page of the book <a href="https://github.com/ProgrammingRust">here</a></p>
+<p>What does code do in C?</p>
+<pre><code class="language-C">int main(int argc, char **argv) {
+    unsigned long a[1];
+    a[3] = 0x7ffff;
+    return 0;
+}
+</code></pre>
+<p>This code is somehow categorized as undefined behavior in C!</p>
+<p><strong>What is the undefined behavior?</strong></p>
+<ul>
+<li>Behavior, upon use of a nonportable or erroneous program construct or of erroneous data, for which this International Standarad imposes no requirements.</li>
+<li>Underfined behavior doesn't just have an unpredictable result: the standard explicitly permits the program to do anything at all.</li>
+</ul>
+<p><strong>Note:</strong> Any software that might handle data from an untRusted source could be the traget of an exploit:
+- Look at the TrueType font issue in 2010.</p>
+<p><strong>Rust Promise:</strong> If a your program passes compiler's checks, it is free of undefined behavior!</p>
+<p><strong>Concurrency:</strong> Rust allows to easily share data betweeen threads, AS LONG AS it is NOT changing! Data that does change, can only be accessed using Synchronization primitives.</p>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Read a bit more about the <strong>Read-Copy-Update</strong></li>
+</ul>
+<br>
+<br>
+<p>You can update Rust using :</p>
+<pre><code class="language-bash">Rustup update
+</code></pre>
+<p>You can tell Cargo to skip git using:</p>
+<pre><code class="language-bash">cargo new test_app --vcs
+</code></pre>
+<p>You can clean the build folder (called target) using:</p>
+<pre><code class="language-bash">cargo clean
+</code></pre>
+<p><strong>Note:</strong> Four-space indentation is standard Rust style.</p>
+<p><strong>isize and usize</strong> types hold pointer-sized singed and unsigned integers, 32 bit long on 32-bit platforms, and 64 bit long on 64-bit platforms.</p>
+<p>Why isize and usize both?</p>
+<ul>
+<li>
+<p>Use usize when indexing collections or sizes (because indexes can't be negative).</p>
+</li>
+<li>
+<p>Use isize when you might subtract two pointers or offsets (since the result can be negative).</p>
+</li>
+</ul>
+<h5 id="assert-macro"><a class="header" href="#assert-macro">Assert! macro:</a></h5>
+<p>It checks that its argument is true and if not, it <em>panics</em>. Unlike C/C++, you cannot skip checking assertions in Rust. You need to use <em>debug_assert!</em> instead.o</p>
+<h4 id="if-statement"><a class="header" href="#if-statement">if statement</a></h4>
+<pre><code class="language-Rust">if a &gt; b {
+    println!("A is greater than b");
+} else {
+    println!("A is NOT greater than b");
+}
+</code></pre>
+<p>As you can see, it does not require () over the condition, but requires {}.<D-s></p>
+<br>
+<br>
+<p>Rust infers the types of value only in the function body! It always requires the function return type and function parameters' types, explicitly!</p>
+<br>
+<br>
+<p>In Rust, usually you return from a function with an expression that is <em>not</em> followed by a semicolon and use <strong>return</strong> statement only from explicit early returns from midst of a function.</p>
+<br>
+<br>
+<pre><code class="language-Rust">#[test]
+foo() {
+    assert_eq!(add_i32(12,12), 24)
+}
+</code></pre>
+<p>You can use <strong>Rust test</strong> to run all tests you wrote which can be scattered throught your project.</p>
+<br>
+<br>
+<p><strong>trait:</strong> It is collection of methods that types can implement.</p>
+<br>
+<br> 
+<p>It is true that vec<i32> is supposed to be dynamic array! However, you still need to mark the variable <strong>mut</strong> for Rust to let you push numbers onto the end of it.</p>
+<br>
+<br>
+<p>Rust iterators are efficient like they were written with a simple loop.</p>
+<br>
+<br>
+<p>Rust does not have any exceptions! Instead, all errors are handled using either <strong>Result</strong> or <strong>panic</strong>.</p>
+<br>
+<br>
+<p>When you use <em><strong>vec</strong></em> which is allocated on heap and its size is dynamic, Rust is cautious to leave the programmer in control of memory consymption, making it clear how long each value lives, while still ensuring memory is freed propmty when no longer needed.</p>
+<p>For example in this code:</p>
+<pre><code class="language-Rust">let mut my_vevtor : Vec&lt;i32&gt; = vec![1,2,3,4,5];
+
+for num in &amp;my_vector[1..] {
+    println!({}, *num);
+    println!({}, num); //  the macro will automatically dereference it.
+}
+</code></pre>
+<p>In this example we are telling Rust that the ownership of the vector should remain with my_vector! We are just <strong>borrowing</strong> its element for the loop. The <em><strong>&amp;</strong></em> operator borrows a reference to the vector's elements, letting num borrow each element in succession! <strong>Note:</strong> I think &amp;my_vector will be something like a fat pointer with start and begin offset!</p>
+<br>
+<br>
+<p><em><strong>println!</strong></em> takes a template string, and then substitutes formatted versions of the remaining arguments for the {...} forms as they appear in the template string, and writes the result to the standard output stream.</p>
+<br>
+<br>
+<p>In Rust (unlike C/C++ which require <em>main</em> to return zero if the program finished successfully, or a non-zero exit status if something went wrong, Rust assumes that if <em><strong>main</strong></em> returns at all, the program finished successfully. You can explicity cause the program to terminate using functions like <strong>expect</strong> or <strong>std::process::exot</strong>.</p>
+<br>
+<br>
+<p>Run this command to open the rust documentation:</p>
+<pre><code class="language-bash">rustup doc --std
+</code></pre>
+<br>
+<br>
+<p>A Rust package whether a library or an executable, is called a <em><strong>crate</strong></em>.</p>
+<br>
+<br>
+<p>If you define a particular version of a package in your toml file, you'd make sure that the code will continue to compile even if a newer version of the package are published!</p>
+<p>Also note that crates can have optional features: part of the interface or implementation that not all users need, but that nonetheless make sense to include in that crate. For example <strong>serde</strong> crate offers ways to handle data from the web. But, it will be available only if we select the crate's <strong>derive</strong> feature:</p>
+<pre><code class="language-toml">[dependencies]
+serde= = { version = "1.", features = ["derive"] }
+</code></pre>
+<p>We need to import only those crates that we'll use directly! Cargo takes care of bringing in whatever other crates need in turn!</p>
+<br>
+<br>
+<p>Rust <strong>raw string</strong> syntax:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let my_str = r###"Ahmad
+Mansouri "ahmad" \n
+"###
+<span class="boring">}</span></code></pre></pre>
+<p>It is like the letter r, zero or more hash marks, a double quote, and then the contents of the string, terminated by another double quote followed by the same number of hash marks.</p>
+<br>
+<br>
+<p>Usually <strong>use</strong> delcarations are added to the beginning of the file. However, it is not strictly necessary.</p>
+<br>
+<br>
+<p>You can use <strong>format!</strong> macro to create you strings:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let response = format!("{} + {} = {}", 12 ,13, 25);
+<span class="boring">}</span></code></pre></pre>
+<br>
+<br>
+<p>Rust makes sure that a shared data structure cannot be acceessed unless when you are holding the lock and release the lock automatically when you are done!</p>
+<p>If youre program compiles in Rust, it is free of data races.</p>
+<p>All Rust functions are thread-safe.
+<br>
+<br></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Option&lt;T&gt; {
+    None,
+    Some(T),
+}
+<span class="boring">}</span></code></pre></pre>
+<br>
+<br>
+<p><strong>Documentation Commentt:</strong> Use /// to mark the comment lines above the function definition. <strong>Note</strong> that rustdoc utility knows how to parse them, together with the code they describe, and produce online documentation.</p>
+<br>
+<br>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn parse&lt;T: FromStr&gt;(s: &amp;str, operator: chat) -&gt; Opttion&lt;(T,T)&gt; {
+    match s.find(operator) {
+        None =&gt; None,
+        Some(index) =&gt; {
+            match(T::from_str(&amp;s[..index]), T::from_str(&amp;s[index+1..])) {
+                (Ok(l), Ok(r)) =&gt; Some((l,r)),
+                _ =&gt; None
+            }
+        }
+    }
+}
+
+#[test]
+fn test_pase_pair() {
+    assert_eq!(parse_pair::&lt;i32&gt;("",        ','), None);
+    assert_eq!(parse_pair::&lt;i32&gt;("10,",     ','), None);
+    assert_eq!(parse_pair::&lt;i32&gt;(",10",     ','), None);
+    assert_eq!(parse_pair::&lt;i32&gt;("10,20",   ','), Some((10,20)));
+    assert_eq!(parse_pair::&lt;i32&gt;("10,20xy", ','), None);
+    assert_eq!(parse_pair::&lt;i32&gt;("0.5×",    '×'), None);
+    assert_eq!(parse_pair::&lt;i32&gt;("0.5×1.5", '×'), Some((0.5, 1.5)));
+}
+<span class="boring">}</span></code></pre></pre>
+<p>A Rust programmer would call T a <em><strong>type parameter</strong></em> of <em>parse_pair</em>.</p>
+<p>When we use a generic function, Rust often are able to infer type parameters for us and we won't need to write them out as we did in the test code.</p>
+<p>If you look at the match block, it will be resolved to (Ok(l), Ok(r)) only if both sides are evaluated to Ok.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>_ =&gt; None
+<span class="boring">}</span></code></pre></pre>
+<p><em><strong>_</strong></em> is a wildcard pattern that matches anything and ignores its value.</p>
+<p>It's common to initialize a struct's fields with variables of the same name, so rather than forcing you to write something like MyClass { re: re, im : im }, Rust let's you simply write MyClass {re, im}.</p>
+<br>
+<br>
+<p>You can access the first element of tuple variable t by t.0 .</p>
+<br>
+<br>
+<p>Rust, generally does not intend to convert between numeric types implicitly! Therefore, we need to write out the conversion we need:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>t.0 as f64
+<span class="boring">}</span></code></pre></pre>
+<br>
+<br>
+<p><strong>Important:</strong> Fallible functions in Rustshould return a <em><strong>Result</strong></em> which is either Ok(result) on success, or Err(e) on failure where is an error code.</p>
+<br>
+<br>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let output = match File::create(filename) {
+    Ok(f) =&gt; f,
+    Err(e) =&gt; {
+        return Err(e);
+    }
+};
+<span class="boring">}</span></code></pre></pre>
+<p>This kind of <strong>match</strong> statement is such a common pattern in Rust that the language provides the <strong>?</strong> operator as shorthand for the whole thing.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let output = File::create(filename)?;
+<span class="boring">}</span></code></pre></pre>
+<p>If File::create fails, the ? operator returns from write_image, passing along the error. Otherwise, <em>output</em> holds the successfylly opened File.</p>
+<hr />
+<p>Hi</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
