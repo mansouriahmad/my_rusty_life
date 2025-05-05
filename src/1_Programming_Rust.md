@@ -328,7 +328,71 @@ let output = File::create(filename)?;
 ```
 If File::create fails, the ? operator returns from write_image, passing along the error. Otherwise, *output* holds the successfylly opened File.
 
+<br>
 
--------
+The crossbeam crate provides a number of valuable concurrency facilities, including a scoped thread facility.
 
-Hi
+<br>
+
+Unlike functions declared with fn, we don't need to decalre the types of a closure's argument: Rust will infer them, along with its return type.
+
+
+<br>
+
+Use ***bat*** command line tool which replaces cat.
+
+<br>
+
+```rust
+#[derive(Debug)]
+struct Arguments {
+    target: String,
+    replacemnet: String,
+    filename: string,
+    output: string
+}
+```
+
+#[derive(Debug)] attribute tells the compiler to generate some extra code that allows us to format the Arguments struct with {:?} in println!.
+
+<br>
+
+use **text-colorizer** for creating colourful output in the termial.
+
+<br>
+
+```rust
+let data = match fs::read_to_string(&args.filename) {
+    Ok(v) => v.
+    Err(e) => {
+        eprintln!("{} failed  to read from file '{}': {:?}",
+                  "Error:".red().bold(), args.filename, e);
+        std::process::exit(1);
+    }
+```
+
+
+As you can see in the code, from a ***match*** statement, we could print the error into err stream as well as exiting the application in case it fails to read the file.
+
+
+<br>
+
+```rust
+use regex::Regex;
+
+fn replace(target: &str, replacement: &str, test: &str) 
+    -> Result<String, regex::Error>
+{
+    let regex = Regex::new(target)?;
+    Ok(regex.replace_all(text, replacement).to_string()
+}
+```
+
+The function returns a Result. We use ? ti short-circuit in case Regex::new fails.
+
+
+
+#### Chaper 3: Fundamental Types
+
+
+
