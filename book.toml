@@ -4,3 +4,8 @@ language = "en"
 multilingual = false
 src = "src"
 title = "My Rusty Life"
+
+
+[output.html]
+additional-css = ["assets/themes/ligatures.css"]
+

@@ -8,5 +8,3 @@ Using ~ on vim change the case of a character
 
 We have modifiers in VIM like i and a. If you are in the middle of (), you can use "d+i+b" or "d+i+(" to remove the content inside ().
 
-
-
