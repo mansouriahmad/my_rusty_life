@@ -9,7 +9,7 @@
 Look at the code below:
 
 ```rust
-fn build_vector() -> Vec<i16> {
+fn build_vector() → Vec<i16> {
     let mut v : Vec<i16> = Vec::<i16>::new();
     v.push(10i16);
     v.push(20i16);
@@ -22,7 +22,7 @@ The issue is that the code is cluttered and repetitive. Since the function's ret
 
 
 ```rust
-fn build_vector() -> Vec<i16> {
+fn build_vector() → Vec<i16> {
     let mut v  = Vec::new();
     v.push(10);
     v.push(20);
@@ -60,7 +60,7 @@ fn build_vector() -> Vec<i16> {
 |&str | Reference to str: non-owning pointer to UTF-8 text | "Ahmad", &s[0..12] | 
 | &[u8], &mut [u8] | Reference to slice: reference to a portion of an array or vector, comprising pointer and length | &v[10.20]|
 | &dyn Any, &mut dyn Read | Triat object: reference to any value that implements a given set of methods | value as &dyn Any, &mut file as &mut dyn Read |
-|fn (&str) -> bool | Pointer to function | str::is_empty |
+|fn (&str) → bool | Pointer to function | str::is_empty |
 
 <br>
 
@@ -111,4 +111,121 @@ Examples:
 <hr>
 
 
+### Fixed-Width Numerric Types
+Fixed-width numeric types can overflow or lose precision, but they are adequate for most applications and can be thousands of times faster than representations like **arbitrary-precision integers** and **exact rationals**.
 
+
+Rust used `u8` type for byte values:
+- reading data from a binary file
+- reding data from a binary socket
+
+Unlike C and C++, Rust treats characters as distinct from the numeric types: a `char` is not a `u8`, nor it is `u32` (although it is 32 bits long).
+
+
+The `usize` and `isize` types are analogous to `size_t` and `ptrdiff_t` in C and C++.
+
+Rust requires array indices to be `usize` values.
+
+*What happens if an integer literal lacks a type suffix?**
+Rust will attemp to infer its type until it find the value was used in a way that pins it down:
+- stored in variable of a particular type
+- passed to function that expects a particular type
+- compared with another value of a particular type
+In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
+
+
+*What happens if an integer literal lacks a type suffix?**
+Rust will attemp to infer its type until it find the value was used in a way that pins it down:
+- stored in variable of a particular type
+- passed to function that expects a particular type
+- compared with another value of a particular type
+In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
+
+
+*What happens if an integer literal lacks a type suffix?**
+Rust will attemp to infer its type until it find the value was used in a way that pins it down:
+- stored in variable of a particular type
+- passed to function that expects a particular type
+- compared with another value of a particular type
+In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
+
+
+*What happens if an integer literal lacks a type suffix?**
+Rust will attemp to infer its type until it find the value was used in a way that pins it down:
+- stored in variable of a particular type
+- passed to function that expects a particular type
+- compared with another value of a particular type
+In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
+
+
+*What happens if an integer literal lacks a type suffix?**
+Rust will attemp to infer its type until it find the value was used in a way that pins it down:
+- stored in variable of a particular type
+- passed to function that expects a particular type
+- compared with another value of a particular type
+In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
+
+
+*What happens if an integer literal lacks a type suffix?**
+Rust will attemp to infer its type until it find the value was used in a way that pins it down:
+- stored in variable of a particular type
+- passed to function that expects a particular type
+- compared with another value of a particular type
+In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
+
+
+*What happens if an integer literal lacks a type suffix?**
+Rust will attemp to infer its type until it find the value was used in a way that pins it down:
+- stored in variable of a particular type
+- passed to function that expects a particular type
+- compared with another value of a particular type
+In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
+
+
+----
+
+**What happens if an integer literal lacks a type suffix?** <br>
+Rust will attemp to infer its type until it find the value was used in a way that pins it down:
+- stored in variable of a particular type
+- passed to function that expects a particular type
+- compared with another value of a particular type
+
+In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
+
+
+----
+
+##### Byte literal
+Although numeric types and the `char` type are distinct, Rust does provide *`byte` literals*, character like literals for `u8` values: b'X' represents the ASCII code for the character X, as a `u8` value. For example, since the ASCII code for A is 65, the literals b'A' and 65u8 are exactly equivalent.
+
+- Only ASCII characters may appear in byte literals.
+
+
+
+Table: Characters requiring a stand-in notation
+|Character|Byte literal|Numeric equivalent|
+|---------|------------|------------------|
+|Singe Quite, '| b'\\''|39u8|
+|Backslash, \ | b'\\'| 92u8|
+|Newline| b'\n'|10u8|
+|Carriage return|b'\r'| 13u8|
+|Tab|b'\t'|9u8|
+
+
+For characters that are hard to write or read, you can write their code in hexadecimal instead. A byte literal of the form `b'\xHH'`, where HH is any two-digit hexadecimal number, represents the byte whose value is HH. For example, you can write a byte literal for ASCII "escape" control character as `b'\x1'`, since the ASCII code for "escape" is 27 or 1B in hexadecimal. Since byte literal are just another notation for `u8` values, consider whether a simple numberic literal might be more legible.
+
+
+##### Integer Conversion
+You can convert from one integer type to another using the `as` operator.
+
+```rust
+//Conversion that are out of range for the destination
+// produce values that are equivalent to the original modulde 2^N,
+// where N is the width of the destination in bits. This is sometimes
+// called "truncations"
+assert_eq!(1000_i16 as u8, 232_u8);
+assert_eq!(65535_u32 as i16, -1_i16);
+
+assert_eq!(-1_i8 as u8, 255_u8);
+assert_eq!(255_u8 as i8, -1_i8);
+```
