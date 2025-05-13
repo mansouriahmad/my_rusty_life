@@ -126,63 +126,7 @@ The `usize` and `isize` types are analogous to `size_t` and `ptrdiff_t` in C and
 
 Rust requires array indices to be `usize` values.
 
-*What happens if an integer literal lacks a type suffix?**
-Rust will attemp to infer its type until it find the value was used in a way that pins it down:
-- stored in variable of a particular type
-- passed to function that expects a particular type
-- compared with another value of a particular type
-In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
-
-
-*What happens if an integer literal lacks a type suffix?**
-Rust will attemp to infer its type until it find the value was used in a way that pins it down:
-- stored in variable of a particular type
-- passed to function that expects a particular type
-- compared with another value of a particular type
-In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
-
-
-*What happens if an integer literal lacks a type suffix?**
-Rust will attemp to infer its type until it find the value was used in a way that pins it down:
-- stored in variable of a particular type
-- passed to function that expects a particular type
-- compared with another value of a particular type
-In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
-
-
-*What happens if an integer literal lacks a type suffix?**
-Rust will attemp to infer its type until it find the value was used in a way that pins it down:
-- stored in variable of a particular type
-- passed to function that expects a particular type
-- compared with another value of a particular type
-In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
-
-
-*What happens if an integer literal lacks a type suffix?**
-Rust will attemp to infer its type until it find the value was used in a way that pins it down:
-- stored in variable of a particular type
-- passed to function that expects a particular type
-- compared with another value of a particular type
-In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
-
-
-*What happens if an integer literal lacks a type suffix?**
-Rust will attemp to infer its type until it find the value was used in a way that pins it down:
-- stored in variable of a particular type
-- passed to function that expects a particular type
-- compared with another value of a particular type
-In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
-
-
-*What happens if an integer literal lacks a type suffix?**
-Rust will attemp to infer its type until it find the value was used in a way that pins it down:
-- stored in variable of a particular type
-- passed to function that expects a particular type
-- compared with another value of a particular type
-In the end, if multiple types could work Rust defaults to `i32` if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
-
-
-----
+---
 
 **What happens if an integer literal lacks a type suffix?** <br>
 Rust will attemp to infer its type until it find the value was used in a way that pins it down:
@@ -203,6 +147,7 @@ Although numeric types and the `char` type are distinct, Rust does provide *`byt
 
 
 Table: Characters requiring a stand-in notation
+
 |Character|Byte literal|Numeric equivalent|
 |---------|------------|------------------|
 |Singe Quite, '| b'\\''|39u8|
@@ -229,3 +174,68 @@ assert_eq!(65535_u32 as i16, -1_i16);
 assert_eq!(-1_i8 as u8, 255_u8);
 assert_eq!(255_u8 as i8, -1_i8);
 ```
+
+The standard library provides some operations as methods on integers:
+
+```rust
+assert_eq!(2_u16.pow(4), 16);
+assert_eq!((-4_i32).abs(), 4);
+assert_eq!(0b101101_u8.count_ones(), 4);
+```
+
+
+---
+
+**Question: Does the code below compile?**
+
+```rust
+println!("{}", (-4).abs());
+```
+
+It would not compile! Rust wnats to know exactly which integer type a value has before it will call the type's own methods. The default of `i32` applies only if the type is still ambiguous after all method calls have been resolved, so that's too late to help here.
+
+**What is the solution then?**
+
+```rust
+println!("{}", (-4_i32).abs());
+println!("{}", i32::abs(-4));
+```
+
+---
+
+**Question: When an integer artithmatic operation overflows, what happens?**
+- In debug build, Rust will panic!
+- In release build, the operation *wraps around*: it produces the value equivalent to the mathematically correct result module the range of the value.
+
+---
+
+#### Enhanced Integer Operations
+When the default behavior isn't what you need, the integer type provide methods that let you spell out exactly what you want.
+
+
+##### *Checked* Integer Operations
+They return an `Option` of the result: `Some(v)` of the mathematically correct can be represented as a value of that type, or `None` if it cannot.
+
+```rust
+assert_eq!(10_u8.checked_add(20), Some(30));
+assert_eq!(100_u8.checked_add(200), None);
+
+// Do the addition; panic if it overflows
+let sum = x.checked_add(y).unwrap();
+```
+
+##### *Wrapping* Integer Operations
+Return the value equivalent to the mathematically correct result modulo the range of the value:
+
+```rust
+assert_eq!(500_u16.wrapping_mul(500), 53392);
+
+assert_eq!(500_i16.wrapping_mul(500), -12144);
+
+// In bitwise shift operations, the shift distance
+// is wrapped to fall within the size of the value.
+// So a shift of 17 bits in a 16-bit type is a shift of 1
+assert_eq!(5_i16.wrapping_shl(17), 10);
+```
+
+**NOTE:** The advantage of these methods is that they behave the same way in all builds.
