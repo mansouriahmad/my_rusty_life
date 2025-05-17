@@ -239,3 +239,65 @@ assert_eq!(5_i16.wrapping_shl(17), 10);
 ```
 
 **NOTE:** The advantage of these methods is that they behave the same way in all builds.
+
+
+
+
+##### *Saturating* Integer Operations
+Return the representable value that is closest to the mathematically correct result (the result will be clamped).
+
+```rust
+assert_eq!(32760_i16.saturating_add(10), 32767);
+assert_eq!((-32760_i16).saturating_sub(10), -32768);
+```
+
+**NOTE:** There are no saturating division, remainder, or bitwise shift methods.
+
+
+##### *Overflowing* Integer Operations
+Return a tuple `(result, overflowed)`, where result is what the wrapping version of the function would return and `overflowed` is a `bool` indicating whether an overflow occurred:
+
+```rust
+assert_eq!(255_u8.overflowing_sub(2), (253, false));
+assert_eq!(255_u8.overflowing_add(2), (1, tur));
+```
+
+Overflowing _shl and overflowing_shr deviated from the pattern a bit: they return true for overflowed only if the shift distance was as large or larger than the bit width of the type itself:
+
+```rust
+assert_eq!(5_u16.overflowing_shl(17), (10, true));
+```
+
+
+#### Floating-Point
+Every part of a floating-point number after the integer is optional, but at least one of the fractional part, exponent or type suffix must be present, to distiguish it from an integer literal. The fractional part may consist of a lone decimal point, so `5.` is a valid floating-point constant.
+
+
+The types `f32` and `f64` have associated constants for the IEEE-required special values like `INFINITY`, `NEG_INFINITY`, `NAN` and `MIN` and `MAX`.
+
+
+```rust
+assert_eq!((-1. / f32::INFINITY).is_sign_negative());
+assert_eq!(-f32::MIN, f32::MAX);
+
+assert_eq!(f32.sqrt() * f32.sqrt(), 5.); // Exactly 5.0, per IEEE
+```
+
+The `std::f32::consts` and `std::f64::consts` modules provide various commonly used mathematical constants like `E`, `PI` and the square root of two.
+
+
+
+#### bool
+
+Rust is very strict: control structures like if and while require their conditions to be bool expressions, as do the short-circuiting logical operators && and ||
+
+Rust cibvert bool values to integer types:
+
+```rust
+assert_eq!(false as i32, 0);
+assert_eq!(true as i32, 1);
+```
+
+**Note:** Rust won't convert a numeric type to `bool`.
+
+#### Characters
