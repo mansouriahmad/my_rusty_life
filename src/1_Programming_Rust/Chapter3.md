@@ -301,3 +301,217 @@ assert_eq!(true as i32, 1);
 **Note:** Rust won't convert a numeric type to `bool`.
 
 #### Characters
+
+Rust character type `char` represents a single Unicode character, as a 32-bit value.
+
+**Important:**
+- Rust uses the `char` type for single characters in isolation. However:
+- uses the UTF-8 enconding for strings and streams of text. Therefore, a `String` represents its text as a sequence of UTF-8 bytes, not as an array of characters.
+
+
+You can use '\xHH' format to write any asky character set (U+0000 to U+007F). Also, you can write any Unicode character as '\u{HHHHHH}', where HHHHHH is a hexadecimal number up to six digits long, with underscores allowed for grouping as usual.
+
+ Rust never implicitly converts between `char` and any other type.
+
+ **char to integer type conversion:**
+ You can use `as` operator to convert a `char` to an integer type; for types smaller than 32 bits, the upper bit of the characterr's value are truncated:
+
+ ```rust
+ assert_eq!('*' as i32, 42);
+ ```
+
+**conversion to char**
+`u8` is the only type the `as` operator will convert to `char`. Why?
+- Rust intends the `as` operator to perform only cheap, infallible conversions
+- Every integer type other than `u8` includes values that are not permitted Unicode code points
+- As a result, those conversion would require run-time checks.
+
+**How to convert to char then?**
+The standard library function `std::char::from_u32` takes any `u32` value and returns an `Option<char>`. If the `u32` is not a permitted Unicode code point, then `from_u32` returns `None`; Otherwise it returns `Some(c)`, where `c` is the `char` result.
+
+Some more useful methods provided by standard library:
+
+```rust
+assert_eq!('*'.is_alphabetic(), false);
+assert_eq!('β'.is_alphaberic(), true);
+assert_eq!('8'.to_digit(10), Some(8));
+assert_eq!('ج'.len_utf8(), 2);
+assert_eq!(std::char:from_digit(2, 10), Some('2'));
+```
+
+
+#### Tuples
+
+Tuples allow only constants as indices, like t.4. You can't write `t.i` or `t[i]` to get the ith element.
+
+Rust code often uses tuple types to return multiple values from a function.
+
+```rust
+fn split_at(&self, mid: usize) -> (&str, &str);
+```
+
+
+One commonly used tuple type is the zero-tuple `()`. This is traditionally called _unit type_ because it has only one value, also written `()`. Rust uses the tye `unit` type where there's no meaningful value to carry, but context require some sort of type.
+
+Rust consistently permits an extra trailing comma everywhere comma are used!
+
+There ven tuples that contain a single value. The literal `("lonely hearts",)` is a tuple containing a single string; its type is `(&str,)`. Here the comma after the value is necessary to distinguish the singleton tuple from a simple parenthetic expression.
+
+
+#### Pointer Types
+
+At runtime, a reference to an `i32` is a single machine word holding the address of the `i32` which may be on the stack or in the heap.
+
+The expression `&x` produces a reference to x; in Rust terminology, we say that it _borrows_ a _reference_ to _x_.
+
+Given a reference `r`, the expression `*r` refers to the value `r` points to.
+
+A reference does not automatically free any resources when it goes out of the scope!
+
+##### &T
+This is an immutable shared reference. You can have many shared references to a given value at a time, but they are read-only. Modifying the value they point to is forbidden, as with `const T*` in C.
+
+##### &mut T
+A mutable and exclusive reference.
+
+
+#### Boxes
+The simplest way to allocate a value in the heap is to use `Box::new`
+
+```rust
+let t = (12, "eggs");
+let b = Box::new(t);
+```
+
+In this code, when `b` goes out of scope, the memory is freed immediately, unless `b` has been moved - by returning it, for example.
+
+
+#### Raw pointers
+Rust has the raw pointer types `*mut T` and `*const T`. Using a raw pointer is unsafe, because Rust makes no effort to track what it points to. You may only dereference a raw pointer within an `unsafe` block. An `unsafe` block is Rust's opt-in mechanism for advanced language features whose safety is up to you. If your code has no `unsafe` block (or if those it does are written correctly), then the safety feature guarantees we emphasize throughout this book still hold.
+
+
+#### Arrays, Vectors, and Slices
+
+The types `&[T]` and `&mut [T]` called a _shared slices of Ts_ and _mutable slice of Ts_. A mutable slice lets you read and modify elements, but can't be shared; a shared slice lets you share access among several readers, but doesn't let you modify elements.
+
+Given a value `v` of any of these types, the expression `v.len()` gives the number of elements in `v`. 
+
+
+Rust has not notion for an initialized array.
+
+**Note:** 
+THe useful methods you'd like to see on arrays, are all provided as methods on slices, not arrays. But, Rust implicity converts a reference to an array to a slice when searching for methods, you can call any slice method on an array directly
+
+##### Vectors
+
+```rust
+let mut primes = vec![2,3,5,7]
+assert_eq!(primes.iter().product::<i32>(), 210);
+```
+
+One way of making vectors is from values produced by an iterator:
+
+```rust
+let v: Vec<i32> = (0..5).collect();
+assert_eq!(v, [0,1,2,3,4]);
+```
+
+If you know the number of elements a vector will need in advance, instead of `Vec::New()` you can call `Vec::with_capacity` to create a vector with a buffer large enough to hold them all, right from the start. 
+
+You cab ubsert abd remove elements wherver you like in a vector, although these operations shift all the elements after the affected position forward or backward, so they may be slow if the vector is large:
+
+```rust
+let mut v = vec![1,2,3];
+
+v.insert(3,35);
+v.remove(1);
+```
+
+You can use the `pop` method to remove the last element and return it. Note that this method returns an `Option<T>`.
+
+Despite ites fundamental role, `Vec` is an ordinary type defined in Rust, not built into the language.
+
+
+#### Slices
+A slice, written `[T]` without specifying the length, is a region of an array or vector.
+
+- Since a slice can be any length, slices can't be stored directly in variables or passed as function arguments.
+- Slices are always passed by reference.
+- A reference to a lice is _fat pointer_.
+
+While an ordinary reference is a non-owning pointer to a singled value, a reference to a slice is a non-owning pointer to a range of consecutive values in memory. This makes slice references a good choice when you want to write a function that opreates on either an array or a vector.
+
+```rust
+fn print(n: &[f64]) {
+    for elt in n {
+        println!("{}", elt);
+    }
+}
+
+print(&a); // works on arrays
+print(&v); // works on vectors
+```
+
+#### String
+
+In string literals, unlike `char` literals, single quotes don't need a backslash escape, and double quotes do.
+
+
+**Note:** If one line of a string ends with a backslash, then the newline character and the leading whitespace on the next line are dropped!
+
+In a few cases, the need to double every backslash in a string is s nuisance (The classic examples are regular expressions and Windows paths). For those cases, Rust offers _raw strings_. A raw string is tagged with the lowercase `r`. All backslashes and whitespace characters inside a raw string are included in verbatim in the string. No escape sequence are recognized.
+
+#### Byte Strings
+
+```rust
+let method = b"GET";
+assert_eq!(method, &[b'G', b'E', b'T']);
+```
+
+Byte strings can use all the other strings syntax we've shown: They can span multiple lines, use escape sequencess, and use backslashes to join lines. Raw byte strings start with `br"`.
+
+
+Byte strings can't contain arbitrary Unicode characters. They must make do with ASCII and \xHH escape characters.
+
+
+#### Strings in Memory
+
+Rust strings are sequences of Unicode characters, but they are not stored in memory as array of `chars`. Instead, they are stored using UTF-8, a variable-width encoding.
+
+A `string` or `&str`'s `.len()` method returns its length. The length is measured in bytes, not characters.
+
+It is **impossible** to modify a `&str`.
+
+When a `String` variable goes out of scope, the buffer is automatically freeds, unless the `String` was moved.
+
+
+There are several ways to create `Strings`:
+
+- The `.to_string()` method converts a `&str` to a `String`. This copies the string.
+- The `format!()` macro works just like `println!()`, except that it returns a new `String` instead of writing text to stdout, and it doesn't automatically addd a new line at the end.
+- Arrays, slices, and vectos of strings have two methods, `.concat()` and `.join(sep)` that form a new `String` from many strings.
+
+```rust
+let bits = vec!["veni", "vidi", "vici"];
+assert_eq!(bits.contact(), "venividivici");
+assert_eq!(bits.join(", "), "veni, vidi, vici");
+```
+#### Using Strings
+
+String support `==` and `!=` operators. Two strings are equal if they contain the same characters in the same order (regardless of whether they point to the same location in memory):
+
+```rust
+assert!("ONE".to_lowercase() == "one");
+```
+
+
+**IMPORTANT:**
+Sometimes a program really needs to be able to deal with strings that are NOT valid Unicode. This usually happens when a Rust program has to interoperate with some other system that doesn't enforce any such rules. For example, in most operating systems it's easy to create a file with filename that isn't valid Unicode. What should happen when a Rust program comes across this sort of filenames?
+
+Rust solution is to offer a few string-like types for these situations:
+
+- Sitck to `String` and `&str` for Unicode text.
+- When working with filenames, use `std::path:PathBuf` and `&Path` instead.
+- When working with binary data file that isn't UTF-8 encoded at all, use `Vec<u8>` and `&[u8]`.
+- When working with environment variable names and command=-line arguments in the native form represented by operating system, use `OsString` and `&OsStr`.
+- When interoperating with C libraries that use null-terminated strings, use `std::ffi::CString` and `&CStr`.
