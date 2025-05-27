@@ -515,3 +515,5 @@ Rust solution is to offer a few string-like types for these situations:
 - When working with binary data file that isn't UTF-8 encoded at all, use `Vec<u8>` and `&[u8]`.
 - When working with environment variable names and command=-line arguments in the native form represented by operating system, use `OsString` and `&OsStr`.
 - When interoperating with C libraries that use null-terminated strings, use `std::ffi::CString` and `&CStr`.
+
+
