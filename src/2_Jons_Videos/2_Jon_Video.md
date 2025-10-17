@@ -40,3 +40,19 @@ Then you need to run flamegraph:
 
 look at Firefox multi-account container
 look at [j](https://github.com/wting/autojump) command 
+
+
+
+---
+
+**Question:** What is the difference between using `as usize` or `usze::form`?
+
+```rust
+fn new(rows: u16, columns: u16) -> Self {
+    Self {
+        cells: vec![b' '; usize::from(rows)]
+    }
+}
+```
+
+In the code above, if instead of using usize::from we use `rows as u16`, in case function parameter type changes to u128, using `as` would compile without any issue. But, `usize::from` would not!
