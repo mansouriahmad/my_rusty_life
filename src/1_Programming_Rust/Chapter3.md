@@ -1,6 +1,6 @@
 - Rust language is to some extent designed around its types! 
 
-- Rust's memory and thread safety comes from the soundness of its type systems
+- Rust's memory and thread safety comes from the soundness of its type systems and its flexibility stems from its generic types and traits.
 
 - Although Rust doesn't promise it will represent things exactly as you've requested, it takes care to deviate from your request only when it's a reliable improvement.
 
@@ -17,7 +17,7 @@ fn build_vector() → Vec<i16> {
 }
 ```
 
-The issue is that the code is cluttered and repetitive. Since the function's return type is Vec<i16>, ***V*** should be a Vec<16>. From that, it follows that each element of the vector should be an `i16`. This is exactly the type of reasoning Rust's type inference applies, allowing the programmer to instead write:
+The issue is that the code is cluttered and repetitive. Since the function's return type is `Vec<i16>`, `V` should be a `Vec<i16>`. From that, it follows that each element of the vector should be an `i16`. This is exactly the type of reasoning Rust's type inference applies, allowing the programmer to instead write:
 
 
 
@@ -36,7 +36,7 @@ fn build_vector() → Vec<i16> {
 
 
 **Note:**
-- Rust's generic functions give the language a degree of the same flexibilty as ***duck typing** in Python, while still catching all type errors at compile time.
+- Rust's generic functions give the language a degree of the same flexibilty as `duck typing` in Python, while still catching all type errors at compile time.
 
 
 **Imporant:** Generic functions are just as efficient as their nongeneric counterparts:
@@ -139,7 +139,7 @@ In the end, if multiple types could work Rust defaults to `i32` if that is among
 
 ----
 
-##### Byte literal
+#### Byte literal
 Although numeric types and the `char` type are distinct, Rust does provide *`byte` literals*, character like literals for `u8` values: b'X' represents the ASCII code for the character X, as a `u8` value. For example, since the ASCII code for A is 65, the literals b'A' and 65u8 are exactly equivalent.
 
 - Only ASCII characters may appear in byte literals.
@@ -160,17 +160,17 @@ Table: Characters requiring a stand-in notation
 For characters that are hard to write or read, you can write their code in hexadecimal instead. A byte literal of the form `b'\xHH'`, where HH is any two-digit hexadecimal number, represents the byte whose value is HH. For example, you can write a byte literal for ASCII "escape" control character as `b'\x1'`, since the ASCII code for "escape" is 27 or 1B in hexadecimal. Since byte literal are just another notation for `u8` values, consider whether a simple numberic literal might be more legible.
 
 
-##### Integer Conversion
+#### Integer Conversion
 You can convert from one integer type to another using the `as` operator.
 
 ```rust
 //Conversion that are out of range for the destination
-// produce values that are equivalent to the original modulde 2^N,
+// produce values that are equivalent to the original modulo 2ⁿ
 // where N is the width of the destination in bits. This is sometimes
 // called "truncations"
 assert_eq!(1000_i16 as u8, 232_u8);
 assert_eq!(65535_u32 as i16, -1_i16);
-
+println!("Hey");
 assert_eq!(-1_i8 as u8, 255_u8);
 assert_eq!(255_u8 as i8, -1_i8);
 ```
@@ -243,7 +243,7 @@ assert_eq!(5_i16.wrapping_shl(17), 10);
 
 
 
-##### *Saturating* Integer Operations
+#### *Saturating* Integer Operations
 Return the representable value that is closest to the mathematically correct result (the result will be clamped).
 
 ```rust
@@ -254,15 +254,15 @@ assert_eq!((-32760_i16).saturating_sub(10), -32768);
 **NOTE:** There are no saturating division, remainder, or bitwise shift methods.
 
 
-##### *Overflowing* Integer Operations
+#### *Overflowing* Integer Operations
 Return a tuple `(result, overflowed)`, where result is what the wrapping version of the function would return and `overflowed` is a `bool` indicating whether an overflow occurred:
 
 ```rust
 assert_eq!(255_u8.overflowing_sub(2), (253, false));
-assert_eq!(255_u8.overflowing_add(2), (1, tur));
+assert_eq!(255_u8.overflowing_add(2), (1, true));
 ```
 
-Overflowing _shl and overflowing_shr deviated from the pattern a bit: they return true for overflowed only if the shift distance was as large or larger than the bit width of the type itself:
+`overflowing_shl` and `overflowing_shr` deviated from the pattern a bit: they return true for overflowed only if the shift distance was as large or larger than the bit width of the type itself:
 
 ```rust
 assert_eq!(5_u16.overflowing_shl(17), (10, true));
@@ -277,21 +277,119 @@ The types `f32` and `f64` have associated constants for the IEEE-required specia
 
 
 ```rust
-assert_eq!((-1. / f32::INFINITY).is_sign_negative());
+assert!((-1. / f32::INFINITY).is_sign_negative());
 assert_eq!(-f32::MIN, f32::MAX);
 
-assert_eq!(f32.sqrt() * f32.sqrt(), 5.); // Exactly 5.0, per IEEE
+assert_eq!(5f32.sqrt() * 5f32.sqrt(), 5.); // Exactly 5.0, per IEEE
 ```
+#### Why this is true in Rust?
+
+This is a great example of how **floating-point arithmetic** and **rounding** behave in Rust (and IEEE-754 floats in general).
+
+You might expect floating-point rounding errors to make this *false* (e.g. `4.9999995 ≠ 5.0`),  
+but it actually passes. Let’s see why.
+
+🧠 Step 1: What Happens Numerically
+
+- `5f32.sqrt()` computes the square root of 5 as a `f32`.  
+  In decimal, that’s approximately:
+
+  ```
+  √5 ≈ 2.236068
+  ```
+
+- Multiplying it by itself:
+  ```
+  2.236068 * 2.236068 ≈ 5.0000005
+  ```
+
+That seems slightly off, but not enough to fail equality.
+
+
+⚙️ Step 2: Floating-Point Precision in `f32`
+
+`f32` (32-bit float) has about **7 significant decimal digits** of precision.
+
+When you multiply two `f32` values, the result is **rounded** to the nearest representable 32-bit float.  
+That rounding can make the result *exactly* 5.0, even if the true mathematical value was 5.0000005.
+
+Example (conceptually):
+
+```
+sqrt(5f32) ≈ 2.23606801033  (stored as a 32-bit float)
+2.23606801033 * 2.23606801033 = 5.000000476837158
+```
+
+Then, because `5.000000476837158` is **closer to 5.0 than to the next representable float**,  
+it gets **rounded to exactly 5.0** in `f32` precision.
+
+So:
+
+```rust
+5f32.sqrt() * 5f32.sqrt() == 5.0f32
+```
+
+🧪 Step 3: Verifying in Code
+
+```rust
+fn main() {
+    let x = 5f32.sqrt();
+    println!("{:?}", x * x); // prints "5.0"
+    println!("{:?}", (x * x).to_bits()); // prints "1084227584"
+    println!("{:?}", 5f32.to_bits());     // prints "1084227584"
+}
+```
+
+Both values have the **exact same bit pattern** (`0x40A00000`),  
+so they are *bitwise identical* — the `assert_eq!` passes.
+
+⚠️ Step 4: But Not Always True
+
+For other numbers, rounding can go the *other way*.  
+For example:
+
+```rust
+assert_ne!(3f32.sqrt() * 3f32.sqrt(), 3.0);
+```
+
+This fails, because the result is slightly below 3.0 after rounding.
+
+---
+✅ Summary
+
+| Expression | Result | Equal to 5.0? | Why |
+|-------------|---------|----------------|------|
+| `5f32.sqrt() * 5f32.sqrt()` | `5.0` | ✅ Yes | rounds exactly to 5.0 |
+| `3f32.sqrt() * 3f32.sqrt()` | `2.9999998` | ❌ No | rounding error slightly below |
+
+---
+
+💡 In Practice
+
+Always use **approximate comparison** for floats:
+
+```rust
+assert!((a - b).abs() < 1e-6);
+```
+
+Only use `assert_eq!` when you know the result is *exactly representable* —  
+as in this rare case with `5f32`.
+
+
+---
+
+
 
 The `std::f32::consts` and `std::f64::consts` modules provide various commonly used mathematical constants like `E`, `PI` and the square root of two.
 
 
+**Note:** Implict integer conversions havea well-established record of causing bugs and secuirty holes, epecially when the integer in question represent the size of something in memory, and an unanticipated overflow occurs.
 
 #### bool
 
 Rust is very strict: control structures like if and while require their conditions to be bool expressions, as do the short-circuiting logical operators && and ||
 
-Rust cibvert bool values to integer types:
+Rust convert bool values to integer types:
 
 ```rust
 assert_eq!(false as i32, 0);
@@ -305,8 +403,8 @@ assert_eq!(true as i32, 1);
 Rust character type `char` represents a single Unicode character, as a 32-bit value.
 
 **Important:**
-- Rust uses the `char` type for single characters in isolation. However:
-- uses the UTF-8 enconding for strings and streams of text. Therefore, a `String` represents its text as a sequence of UTF-8 bytes, not as an array of characters.
+- Rust uses the `char` type for single characters in isolation.
+- However, it uses the UTF-8 enconding for strings and streams of text. Therefore, a `String` represents its text as a sequence of UTF-8 bytes, not as an array of characters.
 
 
 You can use '\xHH' format to write any asky character set (U+0000 to U+007F). Also, you can write any Unicode character as '\u{HHHHHH}', where HHHHHH is a hexadecimal number up to six digits long, with underscores allowed for grouping as usual.
@@ -320,20 +418,20 @@ You can use '\xHH' format to write any asky character set (U+0000 to U+007F). Al
  assert_eq!('*' as i32, 42);
  ```
 
-**conversion to char**
+**conversion to char:**
 `u8` is the only type the `as` operator will convert to `char`. Why?
 - Rust intends the `as` operator to perform only cheap, infallible conversions
 - Every integer type other than `u8` includes values that are not permitted Unicode code points
 - As a result, those conversion would require run-time checks.
 
-**How to convert to char then?**
+**How to convert to `char` then?**
 The standard library function `std::char::from_u32` takes any `u32` value and returns an `Option<char>`. If the `u32` is not a permitted Unicode code point, then `from_u32` returns `None`; Otherwise it returns `Some(c)`, where `c` is the `char` result.
 
 Some more useful methods provided by standard library:
 
 ```rust
 assert_eq!('*'.is_alphabetic(), false);
-assert_eq!('β'.is_alphaberic(), true);
+assert_eq!('β'.is_alphabetic(), true);
 assert_eq!('8'.to_digit(10), Some(8));
 assert_eq!('ج'.len_utf8(), 2);
 assert_eq!(std::char:from_digit(2, 10), Some('2'));
@@ -353,10 +451,29 @@ fn split_at(&self, mid: usize) -> (&str, &str);
 
 One commonly used tuple type is the zero-tuple `()`. This is traditionally called _unit type_ because it has only one value, also written `()`. Rust uses the tye `unit` type where there's no meaningful value to carry, but context require some sort of type.
 
+| Situation                 | Why `()` is used                         |
+|----------------------------|------------------------------------------|
+| Function returns nothing   | Return type must exist                   |
+| Statements                 | All statements evaluate to `()`          |
+| Closures with no return    | They still have a return type            |
+| Match arms/branches        | Must have same type                      |
+| Placeholder in generics    | Type needed, no value to carry           |
+
+
 Rust consistently permits an extra trailing comma everywhere comma are used!
 
 There ven tuples that contain a single value. The literal `("lonely hearts",)` is a tuple containing a single string; its type is `(&str,)`. Here the comma after the value is necessary to distinguish the singleton tuple from a simple parenthetic expression.
 
+
+```rust
+fn main() {
+    let a = ("hello");    // &str, it is equal to let a = "hello";
+    let b = ("hello",);   // (&str,)
+
+    println!("{:?}", a);  // prints: hello
+    println!("{:?}", b);  // prints: ("hello",)
+}
+```
 
 #### Pointer Types
 
@@ -366,7 +483,7 @@ The expression `&x` produces a reference to x; in Rust terminology, we say that 
 
 Given a reference `r`, the expression `*r` refers to the value `r` points to.
 
-A reference does not automatically free any resources when it goes out of the scope!
+A reference does not automatically free any resources when it goes out of the scope! Instead when the owner goes out of scope, the data will be cleared!
 
 ##### &T
 This is an immutable shared reference. You can have many shared references to a given value at a time, but they are read-only. Modifying the value they point to is forbidden, as with `const T*` in C.
@@ -400,14 +517,43 @@ Given a value `v` of any of these types, the expression `v.len()` gives the numb
 Rust has not notion for an initialized array.
 
 **Note:** 
-THe useful methods you'd like to see on arrays, are all provided as methods on slices, not arrays. But, Rust implicity converts a reference to an array to a slice when searching for methods, you can call any slice method on an array directly
+The useful methods you'd like to see on arrays, are all provided as methods on slices, not arrays. But, Rust implicity converts a reference to an array to a slice when searching for methods, you can call any slice method on an array directly
 
+
+```rust
+let mut chaos = [3,5,4,1,2];
+chaos.sort();
+assert_eq!(chaos, [1,2,3,4,5]);
+```
+The `sort` method is actually defined on slices, but since it takes its operand by reference, Rust implicity produces a `&mut [i32]` slice referring to the entire array and passes that to the `sort` method.
 ##### Vectors
 
 ```rust
 let mut primes = vec![2,3,5,7]
 assert_eq!(primes.iter().product::<i32>(), 210);
 ```
+
+
+**Question:** Look at the code below. What happens if `rows * cols` cannot fit into a usize? How can we make it more resilient.
+
+```rust
+fn new_pixel_buffer(rows: usize, cols: usize) -> Vec<u8> {
+    vec![0; rows * cols]
+}
+```
+
+- In debug mode, Rust panics when arithmetic overflows.
+
+- In release mode, Rust performs wrapping arithmetic, meaning the value will silently wrap around (like modulo 2^64 or 2^32), which leads to allocating far fewer bytes than expected, potentially causing a buffer overflow or logic bugs later.
+
+```rust
+fn new_pixel_buffer(rows: usize, cols: usize) -> Option<Vec<u8>> {
+    rows.checked_mul(cols).map(|size| vec![0; size])
+}
+```
+
+
+
 
 One way of making vectors is from values produced by an iterator:
 
@@ -418,7 +564,7 @@ assert_eq!(v, [0,1,2,3,4]);
 
 If you know the number of elements a vector will need in advance, instead of `Vec::New()` you can call `Vec::with_capacity` to create a vector with a buffer large enough to hold them all, right from the start. 
 
-You cab ubsert abd remove elements wherver you like in a vector, although these operations shift all the elements after the affected position forward or backward, so they may be slow if the vector is large:
+You can insert and remove elements wherver you like in a vector, although these operations shift all the elements after the affected position forward or backward, so they may be slow if the vector is large:
 
 ```rust
 let mut v = vec![1,2,3];
@@ -432,22 +578,40 @@ You can use the `pop` method to remove the last element and return it. Note that
 Despite ites fundamental role, `Vec` is an ordinary type defined in Rust, not built into the language.
 
 
+**Example:** Read arguemnt values:
+
+```rust
+let languages: Vec<String> = std::env::args().collect();
+for l in languages {
+    println!("{l:?}");
+}
+```
+
 #### Slices
 A slice, written `[T]` without specifying the length, is a region of an array or vector.
 
-- Since a slice can be any length, slices can't be stored directly in variables or passed as function arguments.
+- Since a slice can be any length, slices can't be stored directly in variables or passed as function arguments (note that you cannot have a variable of type `[T]` but you can have of type `&[T]`)
+
+```rust
+let noodle = "noodle".to_string();
+let oodle = noodle[1..]; // this is an error
+```
 - Slices are always passed by reference.
-- A reference to a lice is _fat pointer_.
+- A reference to a slice is _fat pointer_.
 
 While an ordinary reference is a non-owning pointer to a singled value, a reference to a slice is a non-owning pointer to a range of consecutive values in memory. This makes slice references a good choice when you want to write a function that opreates on either an array or a vector.
 
 ```rust
+
+
 fn print(n: &[f64]) {
     for elt in n {
         println!("{}", elt);
     }
 }
 
+let a = [12., 13., 14.];
+let v = vec![12., 13., 14.];
 print(&a); // works on arrays
 print(&v); // works on vectors
 ```
@@ -461,6 +625,21 @@ In string literals, unlike `char` literals, single quotes don't need a backslash
 
 In a few cases, the need to double every backslash in a string is s nuisance (The classic examples are regular expressions and Windows paths). For those cases, Rust offers _raw strings_. A raw string is tagged with the lowercase `r`. All backslashes and whitespace characters inside a raw string are included in verbatim in the string. No escape sequence are recognized.
 
+```rust
+let default_win_install_path = r"C:\Program Files\Gorillas";
+let pattern = Regex::new(r"\d+(\.\d+)*");
+```
+
+**Note:** There cannot be a double-quote character in a raw string simply by putting a backslash in front of it - We said _no_ scape sequences are recognized. However, there is a cure for that:
+
+```rust
+println!(r###"
+    This raw string started with 'r###"'. Therefore it does not end until we reach a quote mark ('"')
+    followed by immediately by thtree pound signs ('###'):
+"###)
+```
+
+
 #### Byte Strings
 
 ```rust
@@ -473,12 +652,41 @@ Byte strings can use all the other strings syntax we've shown: They can span mul
 
 Byte strings can't contain arbitrary Unicode characters. They must make do with ASCII and \xHH escape characters.
 
+**Question:** Where should we use Byte Strings?
+
+In Rust, you’d use byte strings (b"...") when you want to work with raw bytes instead of UTF-8 &str. This is useful when you’re dealing with binary data, protocols, or non-UTF-8 text.
+
+```rust
+let s = b"hello"; // type is &[u8; 5]
+```
+- b"..." creates a byte string literal (&[u8]).
+- Normal string "..." is UTF-8 (&str).
+- Byte strings cannot contain Unicode characters outside 0–127.
+
+Suppose you’re parsing a binary protocol where the first 4 bytes are a magic number:
+
+```rust
+let packet: &[u8] = &[0xDE, 0xAD, 0xBE, 0xEF, 1, 2, 3];
+
+if packet.starts_with(b"\xDE\xAD\xBE\xEF") {
+    println!("Valid packet header!");
+} else {
+    println!("Invalid packet header!");
+}
+```
 
 #### Strings in Memory
 
 Rust strings are sequences of Unicode characters, but they are not stored in memory as array of `chars`. Instead, they are stored using UTF-8, a variable-width encoding.
 
 A `string` or `&str`'s `.len()` method returns its length. The length is measured in bytes, not characters.
+
+```rust
+let a = "احمد".to_string();
+let l = a.len();
+let c = a.chars().count();
+println!("a's length = {l} and its char length = {c}");
+```
 
 It is **impossible** to modify a `&str`.
 
@@ -504,6 +712,10 @@ String support `==` and `!=` operators. Two strings are equal if they contain th
 assert!("ONE".to_lowercase() == "one");
 ```
 
+**Note:** Give the nature of Unicode, simple `char-by-char` comparison does not always give the expected answers. For example, the Rust string "th\u{e9}" and "the\u{301}" are both valid Unicode reprsenations for _thé_, the French work for tea. Unicode says they should both be displayed and processed in the same way, but Rust treats them as two completely distinct strings.
+
+
+
 
 **IMPORTANT:**
 Sometimes a program really needs to be able to deal with strings that are NOT valid Unicode. This usually happens when a Rust program has to interoperate with some other system that doesn't enforce any such rules. For example, in most operating systems it's easy to create a file with filename that isn't valid Unicode. What should happen when a Rust program comes across this sort of filenames?
@@ -515,5 +727,4 @@ Rust solution is to offer a few string-like types for these situations:
 - When working with binary data file that isn't UTF-8 encoded at all, use `Vec<u8>` and `&[u8]`.
 - When working with environment variable names and command=-line arguments in the native form represented by operating system, use `OsString` and `&OsStr`.
 - When interoperating with C libraries that use null-terminated strings, use `std::ffi::CString` and `&CStr`.
-
 
